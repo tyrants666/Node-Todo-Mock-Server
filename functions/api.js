@@ -1,18 +1,12 @@
+
+const data = require('../db.json')
+
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE'
 };
 
-// Then in your response:
-return {
-  statusCode: 200,
-  headers,
-  body: JSON.stringify(data)
-};
-
-
-const data = require('../db.json')
 
 exports.handler = async (event, context) => {
   const path = event.path.replace('/api/', '')
@@ -29,6 +23,7 @@ exports.handler = async (event, context) => {
       if (task) {
         return {
           statusCode: 200,
+          headers,
           body: JSON.stringify(task)
         }
       }
