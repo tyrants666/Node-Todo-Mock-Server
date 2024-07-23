@@ -8,5 +8,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "json-server": "^1.0.0-beta.1",
+    "netlify-lambda": "^2.0.16"
+  }
 }
