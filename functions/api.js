@@ -1,8 +1,8 @@
-
-const data = require('../db.json')
+const data = require('../db.json');
+const fs = require('fs');
+const path = require('path');
 
 exports.handler = async (event, context) => {
-  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -11,37 +11,66 @@ exports.handler = async (event, context) => {
 
   // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers
-    };
+    return { statusCode: 200, headers };
   }
 
-  const path = event.path.replace('/api/', '');
-  const segments = path.split('/');
+  const segments = event.path.replace('/api/', '').split('/');
 
   if (segments[0] === 'tasks') {
-    if (segments.length === 1) {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(data.tasks)
-      };
-    } else if (segments.length === 2) {
-      const task = data.tasks.find(t => t.id === parseInt(segments[1]));
-      if (task) {
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify(task)
-        };
-      }
+    const taskId = segments.length > 1 ? parseInt(segments[1]) : null;
+
+    switch (event.httpMethod) {
+      case 'GET':
+        if (taskId === null) {
+          return { statusCode: 200, headers, body: JSON.stringify(data.tasks) };
+        } else {
+          const task = data.tasks.find(t => t.id === taskId);
+          return task
+            ? { statusCode: 200, headers, body: JSON.stringify(task) }
+            : { statusCode: 404, headers, body: JSON.stringify({ error: 'Task not found' }) };
+        }
+
+      case 'POST':
+        const newTask = JSON.parse(event.body);
+        newTask.id = Math.max(...data.tasks.map(t => t.id)) + 1;
+        data.tasks.push(newTask);
+        await saveData();
+        return { statusCode: 201, headers, body: JSON.stringify(newTask) };
+
+      case 'PUT':
+        if (taskId === null) {
+          return { statusCode: 400, headers, body: JSON.stringify({ error: 'Task ID is required' }) };
+        }
+        const taskIndex = data.tasks.findIndex(t => t.id === taskId);
+        if (taskIndex === -1) {
+          return { statusCode: 404, headers, body: JSON.stringify({ error: 'Task not found' }) };
+        }
+        const updatedTask = { ...data.tasks[taskIndex], ...JSON.parse(event.body), id: taskId };
+        data.tasks[taskIndex] = updatedTask;
+        await saveData();
+        return { statusCode: 200, headers, body: JSON.stringify(updatedTask) };
+
+      case 'DELETE':
+        if (taskId === null) {
+          return { statusCode: 400, headers, body: JSON.stringify({ error: 'Task ID is required' }) };
+        }
+        const initialLength = data.tasks.length;
+        data.tasks = data.tasks.filter(t => t.id !== taskId);
+        if (data.tasks.length === initialLength) {
+          return { statusCode: 404, headers, body: JSON.stringify({ error: 'Task not found' }) };
+        }
+        await saveData();
+        return { statusCode: 204, headers };
+
+      default:
+        return { statusCode: 405, headers, body: JSON.stringify({ error: 'Method not allowed' }) };
     }
   }
 
-  return {
-    statusCode: 404,
-    headers,
-    body: JSON.stringify({ error: 'Not found' })
-  };
+  return { statusCode: 404, headers, body: JSON.stringify({ error: 'Not found' }) };
 };
+
+async function saveData() {
+  const filePath = path.join(__dirname, '..', 'db.json');
+  await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2));
+}
