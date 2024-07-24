@@ -1,7 +1,7 @@
 {
   "tasks": [
     {
-      "id": "1",
+      "id": 1,
       "title": "Groceries",
       "day": "Feb 20 2022",
       "time": "10:00",
@@ -9,7 +9,7 @@
       "reminder": false
     },
     {
-      "id": "2",
+      "id": 2,
       "title": "Pick Sanu 🚙",
       "day": "March 24 2022",
       "time": "10:00",
@@ -17,14 +17,14 @@
       "reminder": true
     },
     {
-      "id": "3",
+      "id": 3,
       "title": "Birthday",
       "day": "Nov 12 2023",
       "time": "10:00",
       "reminder": false
     },
     {
-      "id": "459d",
+      "id": 459,
       "title": "You are Awesome",
       "day": "Thu Aug 15 2024",
       "reminder": true
