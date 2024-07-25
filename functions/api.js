@@ -3,18 +3,27 @@ const fs = require('fs');
 const path = require('path');
 
 exports.handler = async (event, context) => {
+  console.log('Received event:', JSON.stringify(event, null, 2));
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Max-Age': '2592000', // 30 days
     'Access-Control-Allow-Credentials': 'true'
   };
 
+  // Log the request details
+  console.log('Request Method:', event.httpMethod);
+  console.log('Request Headers:', JSON.stringify(event.headers, null, 2));
+  console.log('Request Path:', event.path);
+
   // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return {
       statusCode: 204,
-      headers
+      headers,
+      body:''
     };
   }
 
